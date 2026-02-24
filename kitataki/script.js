@@ -28,6 +28,14 @@ const ORG_ID = CFG.ORG_ID;
 
 //const el = (id) => document.getElementById(id);
 
+// 町内会名を表示
+document.addEventListener("DOMContentLoaded", () => {
+  const orgEl = document.getElementById("orgName");
+  if (orgEl && window.APP_CONFIG) {
+    orgEl.textContent = window.APP_CONFIG.ORG_NAME;
+  }
+});
+
 
 // ---------------------------------------
 // 表示用：XSS対策（タイトル等の安全表示）

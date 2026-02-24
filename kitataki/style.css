@@ -868,3 +868,27 @@ border-radius:11px;
   text-overflow:ellipsis;
   align-self:center;                 /*flex-start;これは左*/
 }
+
+.trial-label{
+  display:inline-block;
+  margin-top:12px;
+  padding:4px 12px;
+  font-size:13px;
+  background:#fff3f3;
+  color:#b00020;
+  border-radius:20px;
+  font-weight:600;
+}
+.trial-banner{
+  display:inline-block;
+  margin:16px auto 0;
+  padding:6px 18px;
+  font-size:14px;
+  font-weight:600;
+  color:#b00020;
+  background:#fff3f3;
+  border-radius:30px;
+}
+.hero{
+  text-align:center;
+}
