@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>年間行事（管理者）</title>
+
+  <!-- ① 共通設定を最初に読む -->
+  <script src="./config.js"></script>
+
+  <!-- ② Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ③ CSS -->
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./annual.css" />
+</head>
+
+<body>
+
+  <!-- ④ 認証チェック（画面表示前に実行） -->
+  <script>
+  (function(){
+    const cfg = window.APP_CONFIG || {};
+    const KEY = cfg.AUTH_STORAGE_KEY || "hb_admin_auth_v1";
+    const TTL = Number(cfg.AUTH_TTL_HOURS || 8) * 60 * 60 * 1000;
+
+    function isAuthed(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return false;
+        const obj = JSON.parse(raw);
+        if(!obj.ok || !obj.exp) return false;
+        if(Date.now() > obj.exp) return false;
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    function setAuthed(){
+      const exp = Date.now() + TTL;
+      localStorage.setItem(KEY, JSON.stringify({ ok:true, exp }));
+    }
+
+    if (isAuthed()) return;
+
+    const pass = prompt("管理者パスワードを入力してください");
+    if (pass && pass === cfg.ADMIN_PASS){
+      setAuthed();
+      return;
+    }
+
+    alert("パスワードが違います");
+    location.href = "./index.html";
+  })();
+  </script>
+
+  <header class="hero">
+    <h1>年間行事（管理者）</h1>
+    <p>繰り返し行事をまとめて生成 → 確認 → 一括登録します。</p>
+  </header>
+
+  <!-- ナビゲーション -->
+  <div class="topnav" style="text-align:center; margin:10px 0;">
+    <button onclick="location.href='./index.html'">一般画面</button>
+    <button onclick="location.href='./admin.html'">確認者</button>
+    <button onclick="location.href='./annual.html'">年間行事</button>
+    <button onclick="adminLogout()" style="margin-left:10px;">ログアウト</button>
+  </div>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>年間行事入力</h2>
+
+      <div class="form">
+        <div class="field">
+          <div class="label">タイトル</div>
+          <input id="aeTitle" type="text" placeholder="例：役員会" />
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">開始日</div>
+            <input id="aeFrom" type="date" />
+          </div>
+          <div class="field">
+            <div class="label">終了日</div>
+            <input id="aeTo" type="date" />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">開始時間</div>
+            <input id="aeStart" type="time" />
+          </div>
+          <div class="field">
+            <div class="label">終了時間</div>
+            <input id="aeEnd" type="time" />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <div class="label">繰り返し</div>
+            <select id="aeType">
+              <option value="weekly">毎週（曜日指定）</option>
+              <option value="monthly_date">毎月（○日固定）</option>
+              <option value="monthly_nth">毎月（第○曜日）</option>
+              <option value="once">単発（1日だけ）</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label">batch_id（自動）</div>
+            <input id="aeBatch" type="text" />
+          </div>
+        </div>
+
+        <!-- weekly -->
+        <div class="field" id="rowWeekly">
+          <div class="label">曜日（毎週）</div>
+          <div class="dow">
+            <label><input type="checkbox" value="0">日</label>
+            <label><input type="checkbox" value="1">月</label>
+            <label><input type="checkbox" value="2">火</label>
+            <label><input type="checkbox" value="3">水</label>
+            <label><input type="checkbox" value="4">木</label>
+            <label><input type="checkbox" value="5">金</label>
+            <label><input type="checkbox" value="6">土</label>
+          </div>
+        </div>
+
+        <!-- monthly_date -->
+        <div class="grid2" id="rowMonthlyDate" style="display:none;">
+          <div class="field">
+            <div class="label">日（毎月）</div>
+            <input id="aeDay" type="number" min="1" max="31" placeholder="例：15" />
+          </div>
+          <div class="field">
+            <div class="label">（空き）</div>
+            <input disabled placeholder="毎月 ○日 の形式" />
+          </div>
+        </div>
+
+        <!-- monthly_nth -->
+        <div class="grid2" id="rowMonthlyNth" style="display:none;">
+          <div class="field">
+            <div class="label">第○</div>
+            <select id="aeNth">
+              <option value="1">第1</option>
+              <option value="2">第2</option>
+              <option value="3">第3</option>
+              <option value="4">第4</option>
+              <option value="5">第5</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label">曜日</div>
+            <select id="aeDow">
+              <option value="0">日</option>
+              <option value="1">月</option>
+              <option value="2">火</option>
+              <option value="3">水</option>
+              <option value="4">木</option>
+              <option value="5">金</option>
+              <option value="6">土</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <button class="btn" type="button" onclick="generatePreview()">生成してプレビュー</button>
+          <button class="btn2" type="button" onclick="clearPreview()">プレビュークリア</button>
+        </div>
+
+        <hr class="thin" />
+
+        <h3 class="sub">プレビュー</h3>
+        <div class="preview-meta">
+          <div>生成件数：<span id="pvCount">0</span></div>
+          <div>衝突警告：<span id="pvWarn">0</span></div>
+        </div>
+
+        <div class="preview" id="preview"></div>
+
+        <button class="btn btn-full" type="button" onclick="insertPreview()">
+          一括登録（annual_events）
+        </button>
+
+        <p class="note">
+          ※「衝突」は facility_requests の<strong>承認済</strong>と重なる候補です。<br/>
+          ※衝突があっても登録はできます（運用で止めたい場合は後で厳格化できます）。
+        </p>
+      </div>
+    </section>
+
+    <section class="card schedule">
+      <h2>確認（この月の年間行事）</h2>
+      <div class="schedule-controls">
+        <input id="checkMonth" type="month" />
+        <button class="btn" type="button" onclick="loadMonth()">表示</button>
+      </div>
+      <div class="schedule-list" id="monthList"></div>
+    </section>
+  </main>
+
+  <!-- ログアウト処理 -->
+  <script>
+    function adminLogout(){
+      const cfg = window.APP_CONFIG || {};
+      const KEY = cfg.AUTH_STORAGE_KEY || "hb_admin_auth_v1";
+      localStorage.removeItem(KEY);
+      alert("ログアウトしました");
+      location.href = "./index.html";
+    }
+  </script>
+
+  <!-- ⑤ annualロジック -->
+  <script src="./annual.js"></script>
+
+</body>
+</html>

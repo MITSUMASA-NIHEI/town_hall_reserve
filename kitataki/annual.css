@@ -1,0 +1,216 @@
+/* annual.css
+   年間行事（管理者）画面専用スタイル
+   admin.css に上書きされても崩れないよう、セレクタを少し強めています。
+*/
+
+:root{
+  --card-radius: 18px;
+  --border: rgba(0,0,0,.08);
+  --muted: #666;
+  --ok-bg: rgba(76,175,80,.12);
+  --ok-bd: rgba(76,175,80,.30);
+  --warn-bg: rgba(255,193,7,.16);
+  --warn-bd: rgba(255,193,7,.35);
+}
+
+/* ===== フォーム全体の詰め ===== */
+.wrap .card .form{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field .label{
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.grid2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 720px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.thin{
+  border: none;
+  border-top: 1px solid rgba(0,0,0,.08);
+  margin: 6px 0;
+}
+
+/* ===== 曜日（毎週）を「横列」に固定 ===== */
+/*#rowWeekly .dow{
+  display: flex;           /*  横並び flex*/
+/*  flex-wrap: nowrap;         /* 画面が狭い時だけ折り返す wrap 折り返さない　nowrap */
+/*  gap: 10px 14px;
+  align-items: center;
+}
+
+#rowWeekly .dow label{
+  display: inline-flex;    /* ← label自体も横並び要素 */
+/*  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 999px;
+  background: #fff;
+  user-select: none;
+}*/
+
+#rowWeekly .dow{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:6px;
+  margin-top:6px;
+}
+
+#rowWeekly .dow label{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+
+  padding:10px 0;
+  font-size:16px;
+  font-weight:500;
+
+  border-radius:20px;
+  border:1px solid #cfd8d3;
+  background:#fff;
+  
+  box-sizing:border-box;   /* ← 重要 */
+  cursor:pointer;
+}
+
+
+#rowWeekly .dow input[type="checkbox"]{
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== プレビュー ===== */
+.sub{
+  margin: 6px 0 0;
+}
+
+.preview-meta{
+  display: flex;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* プレビューの箱 */
+#preview.preview{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: var(--card-radius);
+  background: #fff;
+  padding: 10px;
+  min-height: 56px;
+}
+
+/* 1行（pv-row）を横グリッドにする */
+#preview .pv-row{
+  display: grid;
+  grid-template-columns: 140px 130px 1fr 70px; /* 日付 / 時間 / タイトル / 状態 */
+  gap: 10px;
+  align-items: center;
+  padding: 10px 10px;
+  border-radius: 12px;
+}
+
+#preview .pv-row + .pv-row{
+  border-top: 1px dashed rgba(0,0,0,.10);
+}
+
+#preview .pv-row > div{
+  min-width: 0;
+}
+
+#preview .pv-row > div:nth-child(3){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge-ok,
+.badge-warn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.badge-ok{
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-bd);
+}
+
+.badge-warn{
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-bd);
+}
+
+/* スマホ時は縦にして見やすく */
+@media (max-width: 720px){
+  #preview .pv-row{
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  #preview .pv-row > div:nth-child(3){
+    white-space: normal;
+  }
+}
+
+/* ===== 月表示（確認） ===== */
+.schedule-controls{
+  display:flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.schedule-list .item{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.schedule-list .time{
+  font-weight: 700;
+}
+
+.schedule-list .title{
+  flex: 1;
+  color: #111;
+}
+
+.schedule-list .tag.approved{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(76,175,80,.12);
+  border: 1px solid rgba(76,175,80,.30);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* ===== ボタン系（annual.html のまま使う） ===== */
+.btnDanger{
+  background: #fff;
+  border: 1px solid rgba(200,0,0,.35);
+  color: #b00000;
+}
+.btnDanger:hover{ filter: brightness(0.98); }

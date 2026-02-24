@@ -1,0 +1,870 @@
+/* =========================================
+   Town Hall Reservation - style.css (clean)
+   - 一般画面 + 管理者画面 共通
+   - 重複定義を整理して 1つに統一
+   ========================================= */
+
+/* ===== Theme ===== */
+:root{
+  --bg: #edf7ee;          /* 全体：薄い緑 */
+  --hero: #e3f3e6;        /* ヘッダー：少し濃い薄緑 */
+  --card: #ffffff;        /* カード：白 */
+  --text: #111;
+  --muted: #555;
+  --line: #e6e7ea;
+  --accent: #0b6b43;      /* メイン緑 */
+  --warn: #b36b00;        /* 確認中の橙 */
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+
+/* ===== Header ===== */
+.hero{
+  padding: 18px 16px;
+  background: var(--hero);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero h1{
+  margin: 0 0 8px;
+  font-size: 22px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.hero p{
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.today{
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+  margin: 4px 0 10px;
+  font-weight: 600;
+}
+
+/* ===== Layout base ===== */
+.wrap{
+  padding: 14px;
+  max-width: 600px;     /* ← 一般画面はスマホ中心 内側の白色枠*/
+  margin: 0 auto;
+}
+
+/* 管理画面だけ横幅を広げる（admin_all.htmlで .wrap.admin-layout を付ける） */
+.wrap.admin-layout{
+  max-width: 1500px;
+  width: min(1500px, 98vw);
+  margin: 0 auto;
+}
+
+/* ===== Card ===== */
+.card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.card h2{
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.help{
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.note{
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ===== Form ===== */
+.form{ display: grid; gap: 12px; }
+.field{ display: grid; gap: 6px; }
+
+.label{
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input{
+  width: 100%;
+  font-size: 16px;            /* iOS拡大防止 */
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.grid2{
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 420px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+/* ===== Buttons ===== */
+.btn{
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 14px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+}
+.btn:active{ transform: scale(0.99); }
+
+/* 管理画面の小ボタン用（必要なら） */
+.btn2{
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btnDanger{
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #d9a2a2;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ===== Schedule list (day / pending 共通) ===== */
+.schedule{ margin-top: 24px; background: transparent; }
+.schedule h2{ font-size: 16px; margin: 0 0 10px; }
+
+.schedule-controls{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+/* 予定アイテム（重なり防止：縦積みが基本） */
+.schedule-list .item{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  align-items: start;
+}
+
+.schedule-list .time{
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.schedule-list .title{
+  color: #333;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* JSが style="font-size:13px" を出しても折り返しさせる保険 */
+.item div[style*="font-size:13px"]{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* ===== Status tag ===== */
+.tag{
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.tag.approved{ color: var(--accent); border-color: var(--accent); }
+.tag.checking{ color: var(--warn); border-color: var(--warn); }
+
+/* ===== Month calendar ===== */
+.cal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin: 8px 0 10px;
+}
+
+.cal-month{ font-weight: 700; }
+
+.cal-nav{
+  border: 1px solid #ddd;
+  background:#fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.month-cal{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cal-dow{
+  font-size: 12px;
+  color:#666;
+  text-align:center;
+  padding: 6px 0;
+}
+
+.cal-cell{
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 8px;
+  min-height: 64px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.cal-cell.is-empty{ background:#fafafa; cursor:default; }
+.cal-cell.is-today{ outline: 2px solid rgba(0,0,0,0.08); }
+
+/* 選択日 */
+.cal-cell.is-selected{
+  outline: 2px solid rgba(0,0,0,0.25);
+  border-radius: 12px;
+}
+
+.cal-date{ font-weight: 700; font-size: 14px; }
+
+.cal-mark{
+  margin-top: 6px;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  display: inline-block;
+  border: 1px solid;
+
+}
+
+.cal-mark.reserved{ color: var(--accent); border-color: var(--accent); }
+.cal-mark.checking{ color: var(--warn); border-color: var(--warn); }
+
+@media (max-width: 520px){
+  .cal-cell{ min-height: 56px; padding: 6px; }
+}
+
+/* ===== Admin layout (3 columns) ===== */
+.admin-layout{
+  display: grid;
+  grid-template-columns: 2.2fr 1.5fr 1.6fr; /* 左=カレンダー広め */
+  gap: 16px;
+  align-items: start;
+}
+
+/* 画面が狭い場合は縦に落とす */
+@media (max-width: 1100px){
+  .admin-layout{ grid-template-columns: 1fr; }
+}
+
+/* 管理画面：ヘッダー部分（月移動） */
+.admin-head{
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-nav{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.admin-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* ===== Admin stats (right top 2x2) ===== */
+.stats-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stat-card{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255,255,255,.75);
+}
+
+.stat-label{ font-size: 12px; color:#666; }
+.stat-value{ font-size: 18px; font-weight: 700; }
+
+/* ===== Actions area in items ===== */
+.actions{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+#pendingList{
+  margin-top: 12px;
+}
+
+/* =========================
+   管理者ページ専用（最終的にここが勝つ）
+   ========================= */
+body.admin-page .wrap{
+  max-width: 100%;
+}
+
+/* タブ */
+.admin-tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+}
+.tab-btn{
+  border: 1px solid rgba(0,0,0,.25);
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.tab-btn.is-active{
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* 3画面（左iframe / 中dashboard / 右iframe） */
+.admin-shell{
+  width: min(1800px, 98vw);
+  margin: 14px auto;
+  display: grid;
+  grid-template-columns: 1.1fr 2.2fr 1.3fr;
+  gap: 16px;
+  align-items: start;
+}
+.admin-single{
+  width: min(1600px, 98vw);
+  margin: 14px auto;
+}
+
+/* iframeカード */
+.iframe-card .admin-iframe{
+  width: 100%;
+  height: 520px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* ダッシュボード内部 3カラム（左/中央/右） */
+.dashboard-card{
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.dash-grid{
+  display:grid;
+  grid-template-columns: 1.35fr 1fr 1.1fr;
+  gap: 16px;
+  align-items: start;
+}
+.inner-card{
+  background: var(--card);
+}
+
+/* 右（統計） */
+.stats-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.stat-card{
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.75);
+}
+.stat-label{ font-size: 12px; color:#666; }
+.stat-value{ font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+/* 予定の“重なり”を根絶（電話やメールは必ず折り返す） */
+.schedule-list .item{
+  display:block;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+.schedule-list .time{ font-weight:700; }
+.schedule-list .title{
+  margin-top: 3px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.schedule-list .item div{
+  overflow-wrap:anywhere;
+  word-break: break-word;
+}
+
+/* ボタン群は右寄せ＋折り返し */
+.schedule-list .item .actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  margin-top: 10px;
+}
+
+/* 画面が狭い場合 */
+@media (max-width: 1200px){
+  .admin-shell{
+    grid-template-columns: 1fr;
+  }
+  .dash-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   管理者画面（admin_all.html）
+   ※このブロックは style.css の末尾に “1回だけ”
+========================= */
+
+body.admin-page .wrap{
+  max-width: 1600px;
+}
+
+body.admin-page .admin-layout{
+  display: grid;
+  grid-template-columns: 2.1fr 1.6fr 1.7fr; /* 左/中央/右 */
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 1100px){
+  body.admin-page .admin-layout{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 上部ボタン */
+.admin-topnav{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top: 10px;
+}
+
+.tabbtn{
+  border: 1px solid rgba(0,0,0,.18);
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tabbtn.is-active{
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.admin-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+}
+
+.admin-nav{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.admin-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* 統計 */
+.stats-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stat-card{
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.75);
+}
+
+.stat-label{ font-size: 12px; color:#666; }
+.stat-value{ font-size: 18px; font-weight: 800; margin-top: 4px; }
+
+.hr-soft{
+  margin: 12px 0;
+  border: 0;
+  border-top: 1px solid rgba(0,0,0,.12);
+}
+
+/* 予定・一覧の重なり防止（メールが長くても折れる） */
+.schedule-list .item{
+  display:block;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+
+.schedule-list .time{
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.schedule-list .title{
+  margin-top: 2px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.schedule-list .item div{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.req-main{
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.req-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.action-row{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.req-date {
+  font-weight: 700;
+}
+
+/*確認画面の拡張*/
+
+/* =========================================
+   admin_all: index版カレンダー見た目に寄せる
+   ========================================= */
+.admin-page .month-cal{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;                 /* index風の余白 */
+  align-items: stretch;
+}
+
+/* 日セル（indexの角丸カード） */
+.admin-page .month-cal .day{
+  height: 72px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.75);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 10px;
+  cursor: pointer;
+  transition: transform .05s ease, box-shadow .05s ease, background .05s ease;
+}
+
+
+
+
+
+
+
+.admin-page .month-cal .day:hover{
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.admin-page .month-cal .day.is-selected{
+  outline: 3px solid rgba(12, 110, 72, .25); /* 緑系の選択 */
+  outline-offset: 2px;
+}
+
+/* 月外（空白/薄く） */
+.admin-page .month-cal .day.is-out{
+  background: transparent;
+  border: 1px dashed rgba(0,0,0,.08);
+  opacity: .35;
+  cursor: default;
+}
+
+/* 日付数字 */
+.admin-page .month-cal .day .num{
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  text-align: left;
+  padding: 0;               /* button paddingで足りる */
+}
+
+/* バッジ領域（右下に寄せる） */
+.admin-page .month-cal .day .badges{
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+/* 予約/確認バッジを index の「丸枠」っぽく */
+.admin-page .month-cal .badge{
+  font-size: 12px;
+  line-height: 1.1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: transparent;
+  border: 2px solid rgba(12,110,72,.45); /* 予約の基本色（緑） */
+  color: rgba(12,110,72,.95);
+  white-space: nowrap;
+}
+
+/* 確認（オレンジ） */
+.admin-page .month-cal .badge-warn{
+  border-color: rgba(230, 126, 34, .65);
+  color: rgba(230, 126, 34, .95);
+}
+
+/* 予約（緑） */
+.admin-page .month-cal .badge-ok{
+  border-color: rgba(12,110,72,.45);
+  color: rgba(12,110,72,.95);
+}
+
+/* 年間行事（小さく） */
+.admin-page .month-cal .badge-annual{
+  border-color: rgba(0,0,0,.18);
+  color: rgba(0,0,0,.65);
+  padding: 4px 8px;
+}
+
+
+
+
+
+/* カレンダーの丸バッジを横書きに固定 */
+.month-cal .badge,
+.cal-mark{
+ /* white-space: nowrap;    改行しない */
+  padding: 6px 16px;     /* ← 横を広げる */
+  border-radius: 24px;   /* ← 999px ではなく少し抑えた丸みに */
+  writing-mode: horizontal-tb; /* 念のため縦書き禁止 */
+  word-break: keep-all;
+}
+
+/* バッジの中身が縦に割れないように */
+.month-cal .badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+/* バッジの並び（セル内で横に並べる） */
+.month-cal .badges,
+.cal-marks{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;           /* 2個以上のときだけ次行へ */
+  justify-content:center;   /* 左寄せにしたければ flex-start */
+}
+
+.cal-cell{
+  min-height: 80px;
+}
+
+
+
+
+
+.pill{
+  display:inline-block;
+  margin-top:8px;
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid;
+}
+
+.pill-ok{ color: var(--accent); border-color: var(--accent); }
+.pill-warn{ color: var(--warn); border-color: var(--warn); }
+
+/* 年間行事 */
+.pill-annual{ color:#666; border-color:#bbb; }
+
+.topnav{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  padding:10px;
+  background:#e9f4ee;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.topnav button{
+  border:1px solid #0b5f3b;
+  background:#fff;
+  color:#0b5f3b;
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.topnav button:hover{
+  background:#0b5f3b;
+  color:#fff;
+}
+
+.submit-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.admin-mini{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:1px solid #0b5f3b;
+  background:#fff;
+  color:#0b5f3b;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.admin-mini:hover{
+  background:#0b5f3b;
+  color:#fff;
+}
+
+
+/* ===== カレンダー全体を7列固定 ===== */
+#monthCal{
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+
+/* ===== 曜日行も同じグリッド内に並ぶ想定 ===== */
+.cal-dow{
+  text-align:center;
+  font-weight:600;
+}
+
+/* ===== 日セルを固定サイズにする ===== */
+.cal-cell{
+  min-width:0;              /* ★これが超重要（横に広がらない） */
+  height:90px;              /* 好みで80〜110調整 */
+  padding:6px;
+  border-radius:12px;
+ /* background:#f4f6f4;*/
+  background:#ffffff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;          /* はみ出し防止 */
+  cursor:pointer;
+}
+
+/* 空白セル */
+.cal-cell.is-empty{
+  background:transparent;
+  cursor:default;
+}
+
+/* 今日 */
+.cal-cell.is-today{
+  outline:2px solid #0b5f3b;
+}
+
+/* 日付 */
+.cal-date{
+  font-size:14px;
+}
+
+/* マーク（予約・確認） */
+/*.cal-mark{
+  font-size:12px;
+  /*white-space:nowrap;*/       /* 折り返さない */
+  /*overflow:hidden;
+  text-overflow:ellipsis;
+  align-self:flex-start;
+}*/
+.cal-mark{
+font-size:14px;
+padding:3px 8px;
+border-radius:11px;
+/*white-space:nowrap;*/       /* 折り返さない */
+  overflow:hidden;
+  text-overflow:ellipsis;
+  align-self:center;                 /*flex-start;これは左*/
+}
