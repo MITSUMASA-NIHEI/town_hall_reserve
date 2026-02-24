@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>町内集会所予約システム</title>
+  
+  
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="./style.css" />
+  
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <header class="hero">
+    <h1>町内集会所予約システム</h1>
+    <p class="today" id="today"></p>
+    <p>集会所の利用予定を、無理のない形で整えるための仕組みです。</p>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>利用を登録する</h2>
+      <p class="help">
+        これから使いたい予定を、分かる範囲で入力してください。<br>
+        後から変更や調整もできます。
+      </p>
+
+      <form class="form" onsubmit="event.preventDefault(); save();">
+        <label class="field">
+          <span class="label">利用日</span>
+          <input id="date" type="date" placeholder="2026-02-01" required />
+        </label>
+
+
+        <!-- 共通ナビ -->
+        
+        <div class="grid2">
+          <label class="field">
+            <span class="label">開始時間</span>
+            <input id="start" type="time" required />
+          </label>
+
+          <label class="field">
+            <span class="label">終了時間</span>
+            <input id="end" type="time" required />
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="label">利用内容</span>
+          <input id="title" type="text" placeholder="役員会" required />
+        </label>
+
+        <label class="field">
+          <span class="label">電話番号（必須）</span>
+          <input id="phone" type="tel" inputmode="tel" placeholder="090-1234-5678" required />
+        </label>
+
+
+        <label class="field">
+          <span class="label">氏名（任意）</span>
+          <input id="name" type="text" placeholder="例：〇〇 〇〇" />
+        </label>
+
+        <label class="field">
+          <span class="label">メールアドレス（任意）</span>
+          <input id="email" type="email" placeholder="example@gmail.com" />
+        </label>
+
+
+        <!--<button type="button" class="btn" onclick="save()">利用を登録する</button>-->
+        <div class="submit-row">
+        <button class="btn btn-full" type="button">
+          利用を登録する
+        </button>
+        <button class="admin-mini" onclick="goAdmin()">⚙</button>
+        </div>
+
+        <p class="note">
+          今日も、鼓動は打っています。<br>
+          ともに感じる一箕地区の鼓動。
+        </p>
+      </form>
+    </section>
+    <section class="schedule">
+      <h2>今月の予定</h2>
+
+      <div class="cal-head">
+        <button type="button" class="cal-nav" onclick="moveMonth(-1)">◀</button>
+        <div id="calMonth" class="cal-month"></div>
+        <button type="button" class="cal-nav" onclick="moveMonth(1)">▶</button>
+      </div>
+
+      <div id="monthCal" class="month-cal"></div>
+
+      <h2 style="margin-top:18px;">この日の予定</h2>
+
+        <div class="schedule-controls">
+          <input 
+            type="date" 
+            id="viewDate" 
+            onchange="loadDaySchedule()"
+          >
+        </div>
+
+      <div id="scheduleList" class="schedule-list"></div>
+    </section>
+  </main>
+
+  
+  <script src="script.js"></script>
+
+  <script>
+  function goAdmin(){
+    location.href = "./admin.html";
+  }
+  </script>
+</body>
+</html>
