@@ -16,13 +16,9 @@
 </head>
 <body>
   <header class="hero">
-    <h1>
-      <span id="orgName"></span><br>
-      集会所予約システム
-    </h1>
-    <div class="trial-banner">
-    試供版（テスト運用中）
-    </div>
+    <h1>町内集会所予約システム</h1>
+    <p class="today" id="today"></p>
+    <p>集会所の利用予定を、無理のない形で整えるための仕組みです。</p>
   </header>
 
   <main class="wrap">
@@ -78,7 +74,7 @@
 
         <!--<button type="button" class="btn" onclick="save()">利用を登録する</button>-->
         <div class="submit-row">
-        <button class="btn btn-full" type="button">
+        <button class="btn btn-full" type="button" onclick="save()">
           利用を登録する
         </button>
         <button class="admin-mini" onclick="goAdmin()">⚙</button>
