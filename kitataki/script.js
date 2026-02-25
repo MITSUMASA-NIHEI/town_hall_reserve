@@ -294,16 +294,19 @@ async function renderMonthCalendar() {
 // 予約登録（自動承認：条件付き + 裏ルール）
 // ---------------------------------------
 async function save() {
+  const btn = document.getElementById("btnSave");
+
+  // 連打防止：すでに送信中なら何もしない
+  if (btn && btn.disabled) return;
+
   try {
     const date  = document.getElementById("date").value.trim();
     const start = document.getElementById("start").value.trim();
     const end   = document.getElementById("end").value.trim();
     const rawTitle = document.getElementById("title").value;
 
-    // タイトル正規化（! / ！対応） ← 先に作る（isPriorityを使うため）
     const { isPriority, cleanTitle } = normalizeTitle(rawTitle);
 
-    // ★連絡先取得
     const phoneRaw = document.getElementById("phone")?.value.trim() || "";
     const name  = document.getElementById("name")?.value.trim() || null;
     const email = document.getElementById("email")?.value.trim() || null;
@@ -314,35 +317,29 @@ async function save() {
       return;
     }
 
-    // ★電話必須
+    // 電話必須
     if (!phoneRaw) {
       alert("電話番号を入力してください。");
       return;
     }
 
-    // 「数字とハイフン」＋連続/末尾ハイフン不可（DBのCHECKと整合）
     const phonePattern = /^[0-9]+(-[0-9]+)*$/;
     if (!phonePattern.test(phoneRaw)) {
       alert("電話番号は数字とハイフンのみで入力してください。\n例：09012345678 / 090-1234-5678");
       return;
     }
 
-    // 保存用：ハイフン除去して数字だけ
     const phone = phoneRaw.replace(/-/g, "");
-
-    // 桁数チェック（10〜11桁）
     if (!/^[0-9]{10,11}$/.test(phone)) {
       alert("電話番号は10〜11桁の数字で入力してください。\n例：09012345678 / 0242220000");
       return;
     }
 
-    // !付き確認（説明しすぎず誤操作防止）
     if (isPriority) {
       const ok = confirm("自動承認で登録します。\nよろしいですか？");
       if (!ok) return;
     }
 
-    // 妥当性チェック
     const startAt = new Date(`${date}T${start}:00`);
     const endAt   = new Date(`${date}T${end}:00`);
 
@@ -358,6 +355,13 @@ async function save() {
 
     const startT = hhmmss(start);
     const endT   = hhmmss(end);
+
+    // ★ここから「送信中」ロック（DBアクセス前）
+    if (btn){
+      btn.disabled = true;
+      btn.dataset.origText = btn.textContent;
+      btn.textContent = "登録中...";
+    }
 
     // 衝突チェック（承認済みだけ）
     const { data: approvedConflicts, error: conflictErr } = await db
@@ -377,7 +381,6 @@ async function save() {
 
     const noApprovedConflict = (approvedConflicts?.length || 0) === 0;
 
-    // 自動承認ロジック
     const durationMin = minutesBetween(startT, endT);
     const withinHours = durationMin > 0 && durationMin <= 180;
     const withinDay =
@@ -385,14 +388,12 @@ async function save() {
       inRange(endT, "08:00:00", "20:00:00");
 
     let decidedStatus = "checking";
-
     if (isPriority && noApprovedConflict) {
       decidedStatus = "approved";
     } else if (noApprovedConflict && withinHours && withinDay) {
       decidedStatus = "approved";
     }
 
-    // 保存（phoneは数字だけで保存）
     const { error } = await db
       .from("facility_requests")
       .insert([{
@@ -413,12 +414,10 @@ async function save() {
       return;
     }
 
-    // 完了表示
-    if (decidedStatus === "approved") {
-      alert("登録できました。（承認されました）");
-    } else {
-      alert("登録できました。（確認になりました）");
-    }
+    alert(decidedStatus === "approved"
+      ? "登録できました。（承認されました）"
+      : "登録できました。（確認になりました）"
+    );
 
     // 入力欄クリア
     document.getElementById("date").value = "";
@@ -429,18 +428,23 @@ async function save() {
     if (document.getElementById("name"))  document.getElementById("name").value = "";
     if (document.getElementById("email")) document.getElementById("email").value = "";
 
-    // 表示更新（今日が選択中なら）
     const viewDateEl = document.getElementById("viewDate");
     if (viewDateEl && viewDateEl.value === date) {
       loadDaySchedule();
     }
-
-    // 月カレンダー更新
     renderMonthCalendar();
 
   } catch (e) {
     alert("保存処理でエラーが発生しました。\n\n" + e.message);
     console.error(e);
+  } finally {
+    // ★必ず解除（失敗でも戻る）
+    const btn = document.getElementById("btnSave");
+    if (btn){
+      btn.disabled = false;
+      btn.textContent = btn.dataset.origText || "利用を登録する";
+      delete btn.dataset.origText;
+    }
   }
 }
 

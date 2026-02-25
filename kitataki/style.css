@@ -892,3 +892,11 @@ border-radius:11px;
 .hero{
   text-align:center;
 }
+
+/* 送信中（クリック不可） */
+#btnSave:disabled{
+  background:#9aa3a0 !important;
+  border-color:#9aa3a0 !important;
+  cursor:not-allowed;
+  opacity:.75;
+}
