@@ -200,31 +200,22 @@ async function fetchMonthSummary(y, m) {
 
   const map = {};
 
+  // 申請（一般）
   for (const r of (reqs || [])) {
     const key = r.date;
-    if (!map[key]) map[key] = { approved: 0, checking: 0 };
+    if (!map[key]) map[key] = { approved: 0, checking: 0, annual: 0 };
     if (r.status === "approved") map[key].approved += 1;
     else map[key].checking += 1;
   }
 
-  for (const a of annual) {
-    const key = a.date;
-    if (!map[key]) map[key] = { approved: 0, checking: 0 };
-    map[key].approved += 1;
+  // 年間行事（annual として加算）
+  for (const a of (annual || [])) {
+    const key = a.date; // a.date が "YYYY-MM-DD" 前提（あなたの既存コードに合わせています）
+    if (!map[key]) map[key] = { approved: 0, checking: 0, annual: 0 };
+    map[key].annual += 1;
   }
 
   return { map, error: null };
-}
-
-function moveMonth(delta) {
-  calYear = Number(calYear);
-  calMonth = Number(calMonth);
-
-  calMonth += delta;
-  if (calMonth <= 0) { calMonth = 12; calYear -= 1; }
-  if (calMonth >= 13) { calMonth = 1; calYear += 1; }
-
-  renderMonthCalendar();
 }
 
 async function renderMonthCalendar() {
@@ -259,14 +250,16 @@ async function renderMonthCalendar() {
     const isToday = (key === todayKey);
 
     const a = (info && info.approved) ? info.approved : 0;
-    const c = (info && info.checking) ? info.checking : 0;
+const c = (info && info.checking) ? info.checking : 0;
+const n = (info && info.annual)   ? info.annual   : 0;
 
-    let markHtml = "";
-    if (c > 0) {
-      markHtml = `<span class="cal-mark checking">確認（${c}）</span>`;
-    } else if (a > 0) {
-      markHtml = `<span class="cal-mark reserved">予約（${a}）</span>`;
-    }
+// 合算：承認 + 確認 + 年間
+const total = a + c + n;
+
+let markHtml = "";
+if (total > 0) {
+  markHtml = `<span class="cal-mark reserved">予約（${total}）</span>`;
+}
 
     const cls = `cal-cell${isToday ? " is-today" : ""}`;
 
