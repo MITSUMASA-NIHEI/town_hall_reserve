@@ -28,14 +28,6 @@ const ORG_ID = CFG.ORG_ID;
 
 //const el = (id) => document.getElementById(id);
 
-// 町内会名を表示
-document.addEventListener("DOMContentLoaded", () => {
-  const orgEl = document.getElementById("orgName");
-  if (orgEl && window.APP_CONFIG) {
-    orgEl.textContent = window.APP_CONFIG.ORG_NAME;
-  }
-});
-
 
 // ---------------------------------------
 // 表示用：XSS対策（タイトル等の安全表示）
@@ -250,16 +242,16 @@ async function renderMonthCalendar() {
     const isToday = (key === todayKey);
 
     const a = (info && info.approved) ? info.approved : 0;
-const c = (info && info.checking) ? info.checking : 0;
-const n = (info && info.annual)   ? info.annual   : 0;
+    const c = (info && info.checking) ? info.checking : 0;
+    const n = (info && info.annual)   ? info.annual   : 0;
 
-// 合算：承認 + 確認 + 年間
-const total = a + c + n;
+    // 合算：承認 + 確認 + 年間
+    const total = a + c + n;
 
-let markHtml = "";
-if (total > 0) {
-  markHtml = `<span class="cal-mark reserved">予約（${total}）</span>`;
-}
+    let markHtml = "";
+    if (total > 0) {
+      markHtml = `<span class="cal-mark reserved">予約（${total}）</span>`;
+    }
 
     const cls = `cal-cell${isToday ? " is-today" : ""}`;
 
@@ -535,6 +527,18 @@ async function fetchAnnualEventsDay(dateStr) {
     _src: "annual"
   }));
 }
+
+function moveMonth(delta){
+  calMonth += delta;
+  if (calMonth <= 0) { calMonth = 12; calYear -= 1; }
+  if (calMonth >= 13) { calMonth = 1; calYear += 1; }
+  renderMonthCalendar();
+}
+
+
+
+
+
 //orgを登録
 
 /*async function resolveOrgId() {
@@ -570,3 +574,6 @@ let ORG_ID = null;*/
   if (!ORG_ID) throw new Error("ORG_ID が未設定です（resolveOrgId が先に必要）");
 }*/
 
+// inline onclick から呼べるようにグローバル公開
+window.moveMonth = moveMonth;
+window.loadDaySchedule = loadDaySchedule;
