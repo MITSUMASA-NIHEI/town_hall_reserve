@@ -246,12 +246,25 @@ async function renderMonthCalendar() {
     const n = (info && info.annual)   ? info.annual   : 0;
 
     // 合算：承認 + 確認 + 年間
-    const total = a + c + n;
+const total = a + c + n;
 
-    let markHtml = "";
-    if (total > 0) {
-      markHtml = `<span class="cal-mark reserved">予約（${total}）</span>`;
-    }
+let markHtml = "";
+
+// ★A: 承認が1件でもあれば「予約（合計）」
+// （承認 + 確認 + 年間 を全部まとめて予約扱い）
+if (a > 0) {
+  markHtml = `<span class="cal-mark reserved">予約（${total}）</span>`;
+
+// ★B: 承認は0で、確認がある → 「確認（確認件数）」
+// （年間があっても “確認優先” にしたいなら、この条件でOK）
+} else if (c > 0) {
+  markHtml = `<span class="cal-mark checking">確認（${c}）</span>`;
+
+// ★C: 承認も確認も0で、年間だけある → 「予約（年間件数）」
+// （年間は予約扱いでOKならこれ）
+} else if (n > 0) {
+  markHtml = `<span class="cal-mark reserved">予約（${n}）</span>`;
+}
 
     const cls = `cal-cell${isToday ? " is-today" : ""}`;
 
