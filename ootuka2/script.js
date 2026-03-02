@@ -274,19 +274,31 @@ if (a > 0) {
         ${markHtml}
       </div>
     `);
-  }
+   }
+  // クリックイベントは monthCal だけに1回だけ付ける（毎回付け直さない）
+if (!calEl.dataset.bound) {
+  calEl.dataset.bound = "1";
 
-  calEl.querySelectorAll(".cal-cell[data-date]").forEach(cell => {
-    cell.addEventListener("click", () => {
-      const date = cell.dataset.date;
-      const viewDateEl = document.getElementById("viewDate");
-      if (viewDateEl) viewDateEl.value = date;
-      loadDaySchedule();
-      document.getElementById("scheduleList")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+  calEl.addEventListener("click", (e) => {
+    // クリックされた場所から「日セル」を探す
+    const cell = e.target.closest(".cal-cell[data-date]");
+    if (!cell) return;
+
+    // 空セルは無視
+    if (cell.classList.contains("is-empty")) return;
+
+    const date = cell.dataset.date;
+    const viewDateEl = document.getElementById("viewDate");
+    if (viewDateEl) viewDateEl.value = date;
+
+    loadDaySchedule();
+
+    // 必要ならスクロール
+    document.getElementById("scheduleList")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
+  }
 }
-
 
 // ---------------------------------------
 // 予約登録（自動承認：条件付き + 裏ルール）
@@ -549,44 +561,41 @@ function moveMonth(delta){
 }
 
 
+//30分単位で丸める
+function snapTo30(val){
+  if(!val) return val;
 
+  const [h,m] = val.split(":").map(Number);
 
-
-//orgを登録
-
-/*async function resolveOrgId() {
-  const params = new URLSearchParams(location.search);
-  const slug = params.get("org") || "kitataki"; // デフォルト北滝沢
-  const { data, error } = await db.from("orgs").select("id,slug,name").eq("slug", slug).single();
-  if (error) { alert("団体設定（org）が不正です: " + error.message); throw error; }
-  document.title = `${data.name} - ${document.title}`;
-  return data.id;
-}
-
-let ORG_ID = null;*/
-
-/*(async function initApp(){
-  ORG_ID = await resolveOrgId(); // ★最初に団体確定
-
-  // viewDate を今日に
-  const view = document.getElementById("viewDate");
-  if (view) {
-    const t = new Date();
-    view.value = `${t.getFullYear()}-${pad2(t.getMonth()+1)}-${pad2(t.getDate())}`;
-    await loadDaySchedule();
+  let newMin;
+  if (m < 15) newMin = 0;
+  else if (m < 45) newMin = 30;
+  else {
+    newMin = 0;
+    return `${String((h+1)%24).padStart(2,"0")}:00`;
   }
 
-  // 月カレンダー初期化
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth() + 1;
-  await renderMonthCalendar();
-})();*/
+  return `${String(h).padStart(2,"0")}:${String(newMin).padStart(2,"0")}`;
+}
 
-/*function requireOrgId(){
-  if (!ORG_ID) throw new Error("ORG_ID が未設定です（resolveOrgId が先に必要）");
-}*/
+function attachSnap(id){
+  const el = document.getElementById(id);
+  if(!el) return;
 
-// inline onclick から呼べるようにグローバル公開
+  el.addEventListener("change",()=>{
+    el.value = snapTo30(el.value);
+  });
+
+  el.addEventListener("blur",()=>{
+    el.value = snapTo30(el.value);
+  });
+}
+
+attachSnap("start");
+attachSnap("end");
+
+
+
+
 window.moveMonth = moveMonth;
 window.loadDaySchedule = loadDaySchedule;
