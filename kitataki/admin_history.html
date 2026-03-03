@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>管理者：履歴（承認・却下）</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="admin-page">
+  <noscript>
+    <div style="padding:12px; background:#fff3cd; border:1px solid #ffeeba; margin:12px; border-radius:10px;">
+      JavaScriptが無効です。履歴画面を利用するにはJavaScriptを有効にしてください。
+    </div>
+  </noscript>
+
+  <header class="hero">
+    <h1>履歴（承認・却下）</h1>
+    <p class="today" id="today"></p>
+    <p>承認済・却下済の履歴を検索できます。</p>
+
+    <div class="admin-topnav">
+      <button type="button" class="tabbtn" id="btnBackAll">承認ダッシュボード（admin_all）</button>
+      <button type="button" class="tabbtn" id="btnOpenIndex">一般画面（index）</button>
+      <button type="button" class="tabbtn" id="btnOpenAnnual">年間行事（admin_annual）</button>
+    </div>
+
+    <div id="status" style="margin-top:10px; font-size:14px; opacity:.9;" aria-live="polite"></div>
+  </header>
+
+  <main class="wrap" style="padding-bottom:24px;">
+    <section class="card">
+      <div class="admin-head" style="align-items:flex-end;">
+        <div>
+          <h2 style="margin:0;">検索</h2>
+          <div class="note">期間・状態・キーワードで絞り込みます</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+        <div>
+          <div class="note">From</div>
+          <input id="fromDate" type="date" class="input" />
+        </div>
+
+        <div>
+          <div class="note">To</div>
+          <input id="toDate" type="date" class="input" />
+        </div>
+
+        <div>
+          <div class="note">状態</div>
+          <select id="statusFilter" class="input">
+            <option value="all">すべて</option>
+            <option value="approved">承認済</option>
+            <option value="rejected">却下</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="note">キーワード（件名/氏名/電話/メール）</div>
+          <input id="q" type="text" class="input" style="min-width:280px;"
+                 placeholder="例：総会 / 二瓶 / 0903 / gmail" />
+        </div>
+
+        <button class="btn" type="button" id="btnSearch">検索</button>
+        <button class="btn2" type="button" id="btnReset">リセット</button>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <div class="admin-head">
+        <h2>履歴一覧</h2>
+        <div class="note">表示件数：<b id="count">0</b></div>
+      </div>
+
+      <div id="list" class="schedule-list"></div>
+    </section>
+  </main>
+  <script src="./config.js"></script>
+  <script src="./admin_history.js" type="module"></script>
+</body>
+</html>

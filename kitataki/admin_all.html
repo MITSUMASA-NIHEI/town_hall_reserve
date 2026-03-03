@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>管理者画面（承認・カレンダー）</title>
+
+ 
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin.css" />
+
+  <!-- Supabase (CDN / v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="admin-page">
+  <noscript>
+    <div style="padding:12px; background:#fff3cd; border:1px solid #ffeeba; margin:12px; border-radius:10px;">
+      JavaScriptが無効です。管理者画面を利用するにはJavaScriptを有効にしてください。
+    </div>
+  </noscript>
+
+  <header class="hero">
+    <h1>管理者画面</h1>
+    <p class="today" id="today"></p>
+    <p>カレンダー表示・確認中一覧・承認/却下ができます。</p>
+
+    <span id="orgNameBadge"></span>
+
+    <!-- 上部ナビ（3画面統合はしない：必要なら別タブで開く） -->
+    <div class="admin-topnav">
+      <button type="button" class="tabbtn is-active" id="btnDash">承認ダッシュボード</button>
+      <button type="button" class="tabbtn" id="btnOpenIndex">一般画面（index）</button>
+      <button type="button" class="tabbtn" id="btnOpenAnnual">年間行事（admin_annual）</button>
+      <button type="button" class="tabbtn" id="btnOpenHistory">履歴（admin_history）</button>
+      <button type="button" class="tabbtn" id="btnRefresh">更新</button>
+    </div>
+
+    <!-- 画面内ステータス（JSが必要に応じて出す） -->
+    <div id="status"
+         style="margin-top:10px; font-size:14px; opacity:.9;"
+         aria-live="polite"></div>
+  </header>
+
+    
+
+<main class="wrap admin-layout">
+  <!-- 左：月カレンダー -->
+  <section class="card" id="panelCalendar">
+    <div class="admin-head">
+      <h2>月カレンダー</h2>
+      <div class="admin-nav">
+        <button class="btn2" type="button" id="btnPrev" aria-label="前の月">◀</button>
+        <div id="calMonth" class="cal-month" aria-live="polite"></div>
+        <button class="btn2" type="button" id="btnNext" aria-label="次の月">▶</button>
+      </div>
+    </div>
+
+    <div id="monthCal" class="month-cal"></div>
+  </section>
+
+  <!-- 右：縦積み（この日の予定 → 確認中） -->
+  <div class="right-col">
+    <!-- この日の予定 -->
+    <section class="card" id="panelDay">
+      <h2>この日の予定（管理者：内容表示）</h2>
+      <div class="note">選択日：<b id="selectedDate">-</b></div>
+      <div id="dayList" class="schedule-list"></div>
+    </section>
+
+    <!-- 確認中＋統計＋一覧 -->
+    <section class="card" id="panelPending">
+      <h2>確認中（checking）一覧</h2>
+      <div class="note">※ ここから承認/却下できます</div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">今日（申請+承認）</div>
+          <div class="stat-value" id="statToday">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">確認中</div>
+          <div class="stat-value" id="statChecking">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">今月 承認済</div>
+          <div class="stat-value" id="statMonthApproved">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">今月 合計</div>
+          <div class="stat-value" id="statMonthTotal">-</div>
+        </div>
+      </div>
+
+      <hr class="hr-soft" />
+
+      <div id="pendingList" class="schedule-list" style="margin-top:10px;"></div>
+    </section>
+  </div>
+</main>
+
+    <!-- panelPending のどこか（h2の下あたりでも、末尾でもOK） -->
+    <div class="admin-actions" style="margin-top:10px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+      <button class="btnDanger" type="button" id="btnResetAll">テストデータ 全リセット</button>
+    </div>
+    <div class="note" style="color:#c0392b;">
+    ※試供版のため、毎日または手動で全リセットします。
+    </div>
+
+  <!-- メインJS -->
+  <script src="./config.js"></script>
+  <script src="./admin_all.js" type="module"></script>
+ 
+  <!-- 開発中だけONにするデバッグ（本番は false 推奨） -->
+  <script>
+    const DEBUG_ALERT = false; // ★開発中だけ true に
+    if (DEBUG_ALERT) {
+      window.addEventListener("error", (e) => {
+        alert("JSエラー: " + e.message);
+      });
+      window.addEventListener("unhandledrejection", (e) => {
+        alert("Promiseエラー: " + (e.reason?.message || e.reason));
+      });
+    } else {
+      // 本番向け：Consoleには残すがalertは出さない
+      window.addEventListener("error", (e) => {
+        console.error("JS Error:", e.message, e.error);
+      });
+      window.addEventListener("unhandledrejection", (e) => {
+        console.error("Promise Error:", e.reason);
+      });
+    }
+  </script>
+</body>
+</html>

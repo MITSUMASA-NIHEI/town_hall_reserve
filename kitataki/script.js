@@ -27,8 +27,9 @@ const db = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY)
 const ORG_ID = CFG.ORG_ID;
 
 //const el = (id) => document.getElementById(id);
-
-
+  document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("orgName").textContent = CFG.ORG_NAME;
+});
 // ---------------------------------------
 // 表示用：XSS対策（タイトル等の安全表示）
 // ---------------------------------------

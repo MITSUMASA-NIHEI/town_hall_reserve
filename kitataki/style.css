@@ -55,6 +55,7 @@ html, body{
   font-weight: 600;
 }
 
+
 /* ===== Layout base ===== */
 .wrap{
   padding: 14px;
@@ -899,4 +900,22 @@ border-radius:11px;
   border-color:#9aa3a0 !important;
   cursor:not-allowed;
   opacity:.75;
+}
+
+#orgName {
+  margin-bottom: 2px;   /* ← 今より小さく */
+  line-height: 1;     /* 行間を締める */
+}
+
+.system-title {
+  margin-top: 0;        /* 上の余白を消す */
+  line-height: 1.2;
+}
+
+h1, h2 {
+  margin: 0;
+}
+.orgNameBadge {
+  display: inline-block;
+  margin: 8px 0 8px 16px;
 }
