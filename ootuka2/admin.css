@@ -1,7 +1,18 @@
-/* admin.css */
+/* admin.css
+   管理画面専用スタイル（承認一覧＋カレンダー拡張）
+   ※ style.css より「後」に読み込むのが前提
+*/
+
+/* =========================
+   共通（管理画面ボタン等）
+========================= */
 
 /* 更新ボタン */
 .btn-full { width: 100%; }
+
+/* =========================
+   承認一覧（req-*）
+========================= */
 
 /* 一覧 */
 .req-list{
@@ -14,7 +25,7 @@
 /* 申請カード（左：内容 / 右：操作） */
 .req-item{
   display:grid;
-  grid-template-columns: 1fr 180px; /* ← 右の操作幅を固定（整列の肝） 240　*/
+  grid-template-columns: 1fr 180px; /* 右の操作幅を固定（整列の肝） */
   gap:18px;
 
   padding:18px;
@@ -32,7 +43,7 @@
 .req-left{ min-width:0; }
 
 .req-date{
-  font-size:24px;          /* ← 利用日を存在感 幅900*/
+  font-size:24px;          /* 利用日を存在感 */
   font-weight:900;
   letter-spacing:.3px;
   margin-bottom:10px;
@@ -58,7 +69,7 @@
   justify-self:end;
   display:flex;
   flex-direction:column;
-  align-items:flex-end;  /* ← 右端に揃える */
+  align-items:flex-end;  /* 右端に揃える */
   gap:10px;
 }
 
@@ -98,7 +109,7 @@
 
 /* アイコンボタン */
 .icon-btn{
-  width:54px; /*ボタンの大きさ　64　56*/
+  width:54px;
   height:48px;
   border-radius:16px;
   border:1px solid rgba(0,0,0,0.18);
@@ -141,4 +152,298 @@
   .top-row, .bottom-row{
     width:auto;
   }
+}
+
+/* ===============================
+   管理画面カレンダー拡張（確実版）
+================================= */
+
+@media (min-width:1024px){
+
+  /* 左カレンダーパネルの max-width 制限があれば解除 */
+  .admin-page #panelCalendar.card{
+    max-width: none !important;
+  }
+
+  /* ---------- ページ外枠：左寄せ & 最大幅 ---------- */
+  .admin-page .wrap{
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 !important;        /* 中央寄せ(auto)を殺す */
+    padding-left: 24px;          /* 左余白（好みで 8〜32） */
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* ---------- レイアウト：2カラム（左：カレンダー／右：縦積み） ---------- */
+  .admin-page main.wrap.admin-layout{
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* ←左をさらに広く */
+    gap: 20px !important;
+    align-items: start !important;
+  }
+
+  /* 右側（この日の予定＋確認中）を縦積みにする前提 */
+  .admin-page .right-col{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:16px !important;
+  }
+
+  /* ① 左パネル自体を最大限使う */
+  .admin-page #panelCalendar{
+    width: 100% !important;
+  }
+
+  /* ② カレンダーのグリッドを横いっぱいに（本命） */
+  .admin-page #monthCal{
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  /* ③ セルが列幅いっぱいを使うようにする */
+  .admin-page #monthCal .cal-cell{
+    width: 100% !important;
+  }
+
+  /* style.css の height:90px を上書き（本命） */
+  .admin-page .cal-cell{
+    height: 140px !important;      /* 110〜160で好みに */
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .admin-page .cal-dow{
+    font-size: 14px;
+  }
+
+  .admin-page .cal-date{
+    font-size: 18px !important;
+    font-weight: 800 !important;
+  }
+
+  .admin-page .cal-mark{
+    display:inline-block;
+    margin-top:6px;
+    padding:6px 12px;
+    font-size:14px;
+    border-radius:999px;
+    font-weight:800;
+  }
+
+  /* ---------- 詳細表示（一般/年間ラベル） ---------- */
+  .admin-page .item-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  .admin-page .kind-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    margin-right:10px;
+  }
+  .admin-page .kind-badge.general{ background:#e7f4ff; }
+  .admin-page .kind-badge.annual{  background:#fff3e6; }
+
+}
+
+/* 「この日の予定」が空のときは省スペース化 */
+.admin-page #panelDay.is-empty{
+  opacity: .85;
+}
+
+.admin-page #panelDay.is-empty #dayList .item{
+  padding: 8px 10px;
+  margin: 0;
+}
+
+/* 空のときはリストを短く見せる（見出しと選択日は残す） */
+.admin-page #panelDay.is-empty #dayList{
+  max-height: 48px;     /* もう少し出したければ 64〜80 */
+  overflow: hidden;
+}
+/* =========================
+   「この日の予定」強調表示
+========================= */
+
+/* 選択日 */
+.admin-page #panelDay .note:first-of-type{
+  font-size: 18px;     /* ← サイズアップ */
+  font-weight: 800;    /* 太字 */
+  margin-bottom: 6px;
+}
+
+/* 日付部分だけさらに強調 */
+.admin-page #selectedDate{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+
+/* 承認説明文 */
+.admin-page #panelDay .note:nth-of-type(2){
+  font-size: 18px;
+  font-weight: 700;
+  color: #444;
+}
+.admin-page #panelDay .note:first-of-type{
+  background: rgba(0,0,0,0.04);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+/* =========================
+   施設名バッジ強調
+========================= */
+
+.admin-page #orgNameBadge{
+  display:inline-block;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  color:#0b6b43;
+  padding:4px 10px;
+  border-radius:8px;
+  background: rgba(11,107,67,0.08);
+}
+
+/* =========================
+   月表示（2026年2月）強調
+========================= */
+
+.admin-page .cal-month{
+  font-size: 22px;     /* サイズアップ */
+  font-weight: 900;    /* 太字 */
+  letter-spacing: .5px;
+}
+
+/* =========================
+   曜日（Sun〜Sat / 日〜土）強調
+========================= */
+
+.admin-page .cal-dow{
+  font-size: 16px;
+  font-weight: 800;
+  color:#222;
+}
+
+.admin-page .admin-head{
+  margin-bottom: 12px;
+}
+
+/* =========================
+   管理画面：カレンダーマス外観
+========================= */
+
+/* 全マス：緑の枠線 + 視認性UP */
+.admin-page #monthCal .cal-cell{
+  border: 2px solid rgba(11, 107, 67, 0.28) !important; /* 緑枠 */
+  background: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+/* ホバー：少しだけ持ち上げる（PCのみでOK） */
+@media (hover:hover){
+  .admin-page #monthCal .cal-cell:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: rgba(11, 107, 67, 0.50) !important;
+  }
+}
+
+/* 選択日：枠を濃く＋薄い緑背景 */
+.admin-page #monthCal .cal-cell.is-selected{
+  border-color: rgba(11, 107, 67, 0.90) !important;
+  background: rgba(11, 107, 67, 0.06) !important;
+}
+
+/* 今日：さらに強調（枠＋内側リング） */
+.admin-page #monthCal .cal-cell.is-today{
+  border-color: rgba(11, 107, 67, 1) !important;
+  box-shadow: 0 0 0 3px rgba(11, 107, 67, 0.16), 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.admin-page #monthCal .cal-cell.is-empty{
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================
+   管理画面：各領域カードに外枠（緑）
+========================= */
+
+/* 月カレンダー / この日の予定 / 確認中一覧 ＝ section.card */
+.admin-page .card{
+  border: 5px solid rgba(11, 107, 67, 0.28) !important;  /* 緑の外枠 */
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+}
+
+/* 見出し行（カード内の上部）を少し区切ると“領域感”が強まる */
+.admin-page .card > h2,
+.admin-page .card .admin-head{
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(11, 107, 67, 0.12);
+}
+
+/* =========================
+   日本式：日曜=赤、土曜=青（B案）
+========================= */
+
+.admin-page #monthCal .cal-cell.is-sun .cal-date{
+  color:#d32f2f;
+  font-weight:900;
+}
+
+.admin-page #monthCal .cal-cell.is-sat .cal-date{
+  color:#1565c0;
+  font-weight:900;
+}
+
+/* 枠色も少し寄せる（好み） */
+.admin-page #monthCal .cal-cell.is-sun{
+  border-color: rgba(211,47,47,0.30) !important;
+}
+.admin-page #monthCal .cal-cell.is-sat{
+  border-color: rgba(21,101,192,0.26) !important;
+}
+
+.btn-delete{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  font-size:16px;
+}
+
+/* ===============================
+   町内会名バッジ（左寄せ）
+=============================== */
+/* 親（コンテナ）は装飾しない：左寄せだけ */
+header.hero #orgNameBadge{
+  display: block;          /* 行として配置（幅は持つが、装飾しない） */
+  text-align: left;
+  margin: 6px 0 10px 16px;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  padding: 0 !important;
+}
+
+/* 中身（バッジ）だけ装飾する */
+header.hero #orgNameBadge .badge{
+  display: inline-block;   /* 文字幅だけ */
+  padding: 4px 12px;
+  background: #e6f4ec;
+  border: 1px solid #7fbf9e;
+  border-radius: 14px;
+  font-weight: 700;
 }

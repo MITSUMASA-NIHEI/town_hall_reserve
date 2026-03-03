@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>年間行事 管理者画面</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header class="hero">
+  <h1>年間行事（管理者）</h1>
+  <p class="today" id="today"></p>
+  <p>毎週・毎月などのルールから日付を自動生成して一括登録します。</p>
+</header>
+
+<main class="wrap">
+  <section class="card">
+    <h2>ルール入力</h2>
+
+    <div class="form" style="margin-top:10px;">
+      <div class="field">
+        <div class="label">タイトル（例：総会、役員会）</div>
+        <input id="aeTitle" placeholder="例：役員会" />
+      </div>
+
+      <div class="grid2">
+  <div class="field">
+    <div class="label">開始時間</div>
+    <input id="aeStart" type="time" value="10:00" />
+  </div>
+  <div class="field">
+    <div class="label">終了時間</div>
+    <input id="aeEnd" type="time" value="12:00" />
+  </div>
+</div>
+
+<!-- 年度（開始年月〜終了年月） -->
+<div class="grid2">
+  <div class="field">
+    <div class="label">開始（年）</div>
+    <input id="aeFromYear" type="number" min="2025" max="2100" value="2026" />
+  </div>
+  <div class="field">
+    <div class="label">開始（月）</div>
+    <input id="aeFromMonth" type="number" min="1" max="12" value="4" />
+  </div>
+
+  <div class="field">
+    <div class="label">終了（年）</div>
+    <input id="aeToYear" type="number" min="2025" max="2100" value="2027" />
+  </div>
+  <div class="field">
+    <div class="label">終了（月）</div>
+    <input id="aeToMonth" type="number" min="1" max="12" value="3" />
+  </div>
+</div>
+
+      <div class="field">
+        <div class="label">パターン</div>
+        <select id="aeType">
+          <option value="monthly_day">毎月○日（例：毎月10日）</option>
+          <option value="monthly_nth_weekday">毎月 第○ 曜日（例：第2水曜）</option>
+          <option value="weekly">毎週 ○曜日（例：毎週火曜）</option>
+        </select>
+      </div>
+
+      <!-- monthly_day -->
+      <div id="boxMonthlyDay" class="grid2">
+        <div class="field">
+          <div class="label">日（1-31）</div>
+          <input id="aeDay" type="number" min="1" max="31" value="18" />
+        </div>
+        <div class="field">
+          <div class="label">補足</div>
+          <input value="（存在しない日付はスキップ）" disabled />
+        </div>
+      </div>
+
+      <!-- monthly_nth_weekday -->
+      <div id="boxMonthlyNth" class="grid2" style="display:none;">
+        <div class="field">
+          <div class="label">第○（1-5）</div>
+          <input id="aeNth" type="number" min="1" max="5" value="2" />
+        </div>
+        <div class="field">
+          <div class="label">曜日</div>
+          <select id="aeWeekday1">
+            <option value="0">日</option>
+            <option value="1">月</option>
+            <option value="2">火</option>
+            <option value="3">水</option>
+            <option value="4">木</option>
+            <option value="5">金</option>
+            <option value="6">土</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- weekly -->
+      <div id="boxWeekly" class="grid2" style="display:none;">
+        <div class="field">
+          <div class="label">曜日</div>
+          <select id="aeWeekday2">
+            <option value="0">日</option>
+            <option value="1">月</option>
+            <option value="2">火</option>
+            <option value="3">水</option>
+            <option value="4">木</option>
+            <option value="5">金</option>
+            <option value="6">土</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">補足</div>
+          <input value="（期間内の該当曜日を全て生成）" disabled />
+        </div>
+      </div>
+
+      <div class="grid2">
+        <button id="btnPreview" type="button" class="pill pill-green">
+          生成してプレビュー
+        </button>
+
+        <button id="btnPreviewClear" type="button" class="pill pill-green-outline">
+          プレビュークリア
+        </button>
+      </div>
+
+
+      <div class="note" id="previewInfo"></div>
+
+      <div class="admin-preview">
+        <table class="admin-table" id="previewTable">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>時間</th>
+              <th>内容</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody">
+            <tr><td colspan="3">まだ生成していません。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid2" style="margin-top:12px;">
+        <button class="btn" type="button" id="btnInsert">この内容で一括登録</button>
+        <button class="btn" type="button" id="btnDisable" style="background:#666;">batch_idで一括停止</button>
+      </div>
+
+    <section class="card">
+      <h2>batch_id 一覧（停止・削除）</h2>
+
+      <div class="schedule-controls">
+        <button class="btn" type="button" onclick="loadBatchList()">一覧更新</button>
+        <div style="color:#666;font-size:13px;">※ ここから選んで停止/削除できます（手入力不要）</div>
+      </div>
+
+      <div class="schedule-list" id="batchList">
+        <div style="color:#666;font-size:13px;">「一覧更新」を押してください。</div>
+      </div>
+    </section>
+
+      <div class="note" id="resultInfo"></div>
+    </div>
+  </section>
+</main>
+<script src="./config.js"></script>
+<script src="admin_annual.js"></script>
+</body>
+</html>
+
