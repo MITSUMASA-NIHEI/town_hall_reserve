@@ -916,10 +916,91 @@ async function refreshAfterChange(dateStr){
   }
 }
 
+
+// ================================
+// 試供版 全リセット（地区別・論理削除）
+// 対象：facility_requests / annual_events
+// 条件：org_id = ORG_ID のみ 2026/03/07に変更
+// ================================
+async function resetAllTestData() {
+  const orgLabel = `${CFG.ORG_NAME} (${ORG_ID})`;
+
+  const word = (prompt(
+    "【試供版 全リセット】\n\n" +
+    `対象地区: ${orgLabel}\n\n` +
+    "実行する場合は「RESET」と入力してください。"
+  ) || "").trim().toUpperCase();
+
+  if (word !== "RESET") {
+    alert("キャンセルしました。");
+    return;
+  }
+
+  const ok = confirm(
+    "【試供版】テストデータを全リセットします。\n\n" +
+    `対象地区：${orgLabel}\n` +
+    "対象テーブル：\n" +
+    "・一般予約（facility_requests）\n" +
+    "・年間行事（annual_events）\n\n" +
+    "処理内容：\n" +
+    "・当該地区のデータのみ削除扱い（deleted_at設定）にします\n" +
+    "・元に戻すにはDB操作が必要です\n\n" +
+    "実行しますか？"
+  );
+  if (!ok) return;
+
+  const btn = document.getElementById("btnResetAll");
+  if (btn) btn.disabled = true;
+
+  try {
+    const nowIso = new Date().toISOString();
+
+    // 1) 一般予約：当該地区のみ論理削除
+    const { error: reqErr } = await db
+      .from("facility_requests")
+      .update({ deleted_at: nowIso })
+      .eq("org_id", ORG_ID)
+      .is("deleted_at", null);
+
+    if (reqErr) throw new Error("facility_requests: " + reqErr.message);
+
+    // 2) 年間行事：当該地区のみ論理削除
+    const { error: annualErr } = await db
+      .from("annual_events")
+      .update({ deleted_at: nowIso })
+      .eq("org_id", ORG_ID)
+      .is("deleted_at", null);
+
+    if (annualErr) throw new Error("annual_events: " + annualErr.message);
+
+    alert(`全リセットしました。\n対象地区：${orgLabel}`);
+
+    // 画面を今日に戻す
+    const t = new Date();
+    selected = ymd(t.getFullYear(), t.getMonth() + 1, t.getDate());
+    calYear = t.getFullYear();
+    calMonth = t.getMonth() + 1;
+
+    const selEl = document.getElementById("selectedDate");
+    if (selEl) selEl.textContent = selected;
+
+    // 別タブへ変更通知
+    localStorage.setItem("annual_changed", String(Date.now()));
+    localStorage.setItem("facility_changed", String(Date.now()));
+
+    await reloadAll();
+
+  } catch (err) {
+    console.error(err);
+    alert("リセット失敗：" + (err?.message || String(err)));
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
 // ================================
 // テストデータ 全リセット（論理削除）
 // ================================
-async function resetAllTestData(){
+/*async function resetAllTestData(){
 
   const word = (prompt(
     "【試供版 全リセット】\n\n" +
@@ -975,7 +1056,7 @@ async function resetAllTestData(){
   }finally{
     if (btn) btn.disabled = false;
   }
-}
+}*/
 
 function refreshAll(){
   // ★ここをあなたの実関数に合わせる
